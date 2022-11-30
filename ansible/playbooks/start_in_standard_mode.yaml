@@ -1,0 +1,17 @@
+- name: Submit and monitor image creation
+  hosts: all
+  vars:
+    RECURSIVE_MONITORING: True
+  tasks:
+
+    - name: Submit and monitor DAG RUN
+      block:
+        - import_tasks: "submit_imagecreation_tasks.yaml"
+
+        - include_tasks: "monitor_imagecreation_tasks.yaml"
+
+        - name: fail if in case of error
+          fail:
+            msg: "Image creation failed"
+          when: TOSCA_JOB_STATUS == 'FAILED'
+      when: run_in_standard_mode == 'true'

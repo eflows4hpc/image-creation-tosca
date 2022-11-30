@@ -2,7 +2,7 @@ tosca_definitions_version: alien_dsl_3_0_0
 
 metadata:
   template_name: imagecreation.ansible
-  template_version: 1.1.0-SNAPSHOT
+  template_version: 1.2.0-SNAPSHOT
   template_author: loicalbertin
 
 
@@ -61,9 +61,30 @@ node_types:
         type: boolean
         description: Do not redact sensible information on logs
         default: false
+      run_in_standard_mode:
+        type: boolean
+        required: false
+        default: true
     attributes:
       filename: { get_operation_output: [ SELF, tosca.interfaces.node.lifecycle.Runnable, run, filename ] }
     interfaces:
+      Standard:
+        inputs:
+          run_in_standard_mode: { get_property: [ SELF, run_in_standard_mode ] }
+          service_url: { get_property: [ SELF, service_url ] }
+          insecure_tls: { get_property: [ SELF, insecure_tls ] }
+          debug_logs: { get_property: [ SELF, debug ] }
+          username: { get_property: [ SELF, username ] }
+          password: { get_property: [ SELF, password ] }
+
+        start:
+          inputs:
+            machine: { get_property: [ SELF, machine ] }
+            workflow: { get_property: [ SELF, workflow ] }
+            step_id: { get_property: [ SELF, step_id ] }
+            force: { get_property: [ SELF, force ] }
+          implementation: playbooks/start_in_standard_mode.yaml
+
       tosca.interfaces.node.lifecycle.Runnable:
         inputs:
           service_url: { get_property: [ SELF, service_url ] }
