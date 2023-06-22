@@ -10,6 +10,7 @@ imports:
   - tosca-normative-types:1.0.0-ALIEN20
   - alien-base-types:3.0.0
   - yorc-types:1.1.0
+  - eflows4hpc.env:1.1.0
 
 data_types:
   imagecreation.ansible.datatypes.Machine:
@@ -22,6 +23,12 @@ data_types:
         type: string
         required: true
       container_engine:
+        type: string
+        required: true
+      mpi:
+        type: string
+        required: true
+      gpu:
         type: string
         required: true
 
@@ -68,6 +75,11 @@ node_types:
     attributes:
       filename_run: { get_operation_output: [ SELF, tosca.interfaces.node.lifecycle.Runnable, run, filename ] }
       filename_start: { get_operation_output: [ SELF, Standard, start, filename ] }
+    requirements:
+      - environment:
+          capability: eflows4hpc.env.capabilities.ExecutionEnvironment
+          relationship: tosca.relationships.DependsOn
+          occurrences: [ 0, UNBOUNDED ]
     interfaces:
       Standard:
         inputs:
@@ -84,6 +96,11 @@ node_types:
             workflow: { get_property: [ SELF, workflow ] }
             step_id: { get_property: [ SELF, step_id ] }
             force: { get_property: [ SELF, force ] }
+            machine_platform_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_platform] }
+            machine_architecture_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_architecture] }
+            machine_container_engine_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_container_engine] }
+            machine_mpi_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_mpi] }
+            machine_gpu_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_gpu] }
           implementation: playbooks/start_in_standard_mode.yaml
 
       tosca.interfaces.node.lifecycle.Runnable:
@@ -99,6 +116,11 @@ node_types:
             workflow: { get_property: [ SELF, workflow ] }
             step_id: { get_property: [ SELF, step_id ] }
             force: { get_property: [ SELF, force ] }
+            machine_platform_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_platform] }
+            machine_architecture_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_architecture] }
+            machine_container_engine_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_container_engine] }
+            machine_mpi_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_mpi] }
+            machine_gpu_from_env: { get_attribute: [ REQ_TARGET, environment, image_creation_machine_gpu] }
           implementation: playbooks/submit_imagecreation.yaml
         run:
           implementation: playbooks/monitor_imagecreation.yaml
