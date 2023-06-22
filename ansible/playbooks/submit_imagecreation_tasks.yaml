@@ -1,8 +1,18 @@
 ---
+
+- name: Set machine from env
+  set_fact:
+    machine_from_env:
+      platform: "{{ machine_platform_from_env | default(omit) }}"
+      architecture: "{{ machine_architecture_from_env | default(omit) }}"
+      container_engine: "{{ container_engine | default(omit) }}"
+      mpi: "{{ machine_mpi_from_env | default(omit) }}"
+      gpu: "{{ machine_gpu_from_env | default(omit) }}"
+
 - name: Set payload
   set_fact:
     payload:
-      machine: "{{ machine | from_json }}"
+      machine: "{{ machine | from_json | combine(machine_from_env) }}"
       workflow: "{{ workflow }}"
       step_id: "{{ step_id }}"
       force: "{{ force }}"
